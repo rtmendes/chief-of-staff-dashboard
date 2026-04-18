@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chief of Staff — Rashida Command Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117; --card: #1e2130; --card-hover: #252840; --border: #2d3048; --border-light: #363c5c;
+    --accent: #6366f1; --accent-light: #818cf8; --accent-dim: rgba(99,102,241,0.15);
+    --green: #22c55e; --green-dim: rgba(34,197,94,0.12); --yellow: #eab308; --yellow-dim: rgba(234,179,8,0.12);
+    --red: #ef4444; --red-dim: rgba(239,68,68,0.12); --orange: #f97316; --orange-dim: rgba(249,115,22,0.12);
+    --blue: #3b82f6; --blue-dim: rgba(59,130,246,0.12); --purple: #a855f7; --purple-dim: rgba(168,85,247,0.12);
+    --text: #e2e8f0; --text-muted: #94a3b8; --text-dim: #64748b; --mono: 'JetBrains Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1.5; min-height: 100vh; overflow-x: hidden; }
+  .header { background: linear-gradient(135deg, #1a1d2e 0%, #0f1117 60%); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); }
+  .header-left { display: flex; align-items: center; gap: 16px; }
+  .header-logo { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--purple)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; color: white; }
+  .header-title { font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+  .header-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  .live-badge { display: flex; align-items: center; gap: 6px; background: var(--green-dim); border: 1px solid rgba(34,197,94,0.3); border-radius: 20px; padding: 4px 10px; font-size: 11px; color: var(--green); font-weight: 600; }
+  .live-dot { width: 7px; height: 7px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(0.8); } }
+  .header-date { font-size: 12px; color: var(--text-muted); font-family: var(--mono); }
+  .alert-banner { background: linear-gradient(90deg,rgba(239,68,68,0.15),rgba(249,115,22,0.08)); border-bottom: 1px solid rgba(239,68,68,0.3); padding: 10px 24px; display: flex; align-items: center; gap: 12px; font-size: 12px; }
+  .alert-icon { font-size: 16px; flex-shrink: 0; }
+  .alert-items { display: flex; gap: 16px; flex-wrap: wrap; flex: 1; }
+  .alert-item { display: flex; align-items: center; gap: 6px; color: #fca5a5; }
+  .alert-item a { color: #fca5a5; text-decoration: none; } .alert-item a:hover { color: #ff8080; text-decoration: underline; }
+  .alert-urgent { font-weight: 700; color: var(--red); font-size: 11px; background: var(--red-dim); padding: 2px 6px; border-radius: 4px; }
+  .main { padding: 20px 24px; display: grid; gap: 20px; max-width: 1800px; margin: 0 auto; }
+  .row { display: grid; gap: 20px; } .row-2 { grid-template-columns: repeat(2,1fr); } .row-4 { grid-template-columns: repeat(4,1fr); }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .card-header { padding: 14px 18px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .card-title { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; display: flex; align-items: center; gap: 8px; }
+  .card-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; background: var(--accent-dim); color: var(--accent-light); }
+  .card-body { padding: 16px 18px; }
+  .pill { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; letter-spacing: 0.3px; }
+  .pill-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+  .green { background: var(--green-dim); color: var(--green); } .green .pill-dot { background: var(--green); }
+  .yellow { background: var(--yellow-dim); color: var(--yellow); } .yellow .pill-dot { background: var(--yellow); }
+  .red { background: var(--red-dim); color: var(--red); } .red .pill-dot { background: var(--red); }
+  .blue { background: var(--blue-dim); color: var(--blue); } .blue .pill-dot { background: var(--blue); }
+  .purple { background: var(--purple-dim); color: var(--purple); } .purple .pill-dot { background: var(--purple); }
+  .briefing-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .briefing-section-title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  .priority-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .priority-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .priority-num { width: 22px; height: 22px; border-radius: 6px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; font-family: var(--mono); }
+  .p1 { background: var(--red-dim); color: var(--red); } .p2 { background: var(--yellow-dim); color: var(--yellow); } .p3 { background: var(--blue-dim); color: var(--blue); }
+  .priority-text { font-size: 12px; color: var(--text); font-weight: 500; line-height: 1.4; }
+  .priority-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .decision-item { padding: 9px 0; border-bottom: 1px solid var(--border); } .decision-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .decision-q { font-size: 12px; color: var(--text); font-weight: 500; } .decision-context { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .blocker-item { display: flex; gap: 8px; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid var(--border); } .blocker-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .blocker-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; } .blocker-text { font-size: 12px; color: var(--text); font-weight: 500; } .blocker-impact { font-size: 11px; color: var(--red); margin-top: 2px; }
+  .project-grid { display: grid; gap: 0; }
+  .project-row { display: grid; grid-template-columns: 200px 90px 110px 1fr 100px 90px; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .project-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .project-header-row { font-size: 10px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.6px; padding: 0 0 8px; border-bottom: 1px solid var(--border); }
+  .project-name { font-size: 13px; font-weight: 600; color: var(--text); } .project-biz { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+  .project-next { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+  .project-owner { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; text-align: center; }
+  .owner-ai { background: var(--purple-dim); color: var(--purple); } .owner-r { background: var(--blue-dim); color: var(--blue); } .owner-both { background: var(--accent-dim); color: var(--accent-light); }
+  .project-updated { font-size: 10px; color: var(--text-dim); font-family: var(--mono); }
+  .biz-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; position: relative; overflow: hidden; }
+  .biz-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+  .biz-card.funded::before { background: linear-gradient(90deg,var(--accent),var(--purple)); }
+  .biz-card.insight::before { background: linear-gradient(90deg,var(--green),var(--blue)); }
+  .biz-card.fgs::before { background: linear-gradient(90deg,var(--orange),var(--yellow)); }
+  .biz-card.spring::before { background: linear-gradient(90deg,var(--purple),var(--accent)); }
+  .biz-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+  .biz-name { font-size: 13px; font-weight: 700; color: var(--text); } .biz-type { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+  .biz-amount { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; font-family: var(--mono); } .biz-label { font-size: 10px; color: var(--text-muted); }
+  .progress-bar { height: 5px; background: var(--border); border-radius: 3px; margin: 8px 0 10px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 3px; transition: width 1.2s cubic-bezier(0.4,0,0.2,1); }
+  .fill-green { background: linear-gradient(90deg,var(--green),#16a34a); } .fill-yellow { background: linear-gradient(90deg,var(--yellow),#ca8a04); }
+  .fill-red { background: linear-gradient(90deg,var(--red),#dc2626); } .fill-accent { background: linear-gradient(90deg,var(--accent),var(--purple)); }
+  .biz-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .biz-stat-val { font-size: 13px; font-weight: 700; color: var(--text); font-family: var(--mono); } .biz-stat-key { font-size: 10px; color: var(--text-muted); }
+  .biz-next-event { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text-muted); }
+  .kanban { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+  .kanban-col-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-radius: 8px 8px 0 0; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; }
+  .kanban-now { background: rgba(99,102,241,0.12); color: var(--accent-light); border-bottom: 2px solid var(--accent); }
+  .kanban-week { background: rgba(59,130,246,0.1); color: #93c5fd; border-bottom: 2px solid var(--blue); }
+  .kanban-backlog { background: rgba(100,116,139,0.12); color: var(--text-muted); border-bottom: 2px solid var(--border-light); }
+  .kanban-blocked { background: rgba(239,68,68,0.1); color: #fca5a5; border-bottom: 2px solid var(--red); }
+  .col-count { background: rgba(0,0,0,0.3); padding: 1px 6px; border-radius: 20px; font-size: 10px; }
+  .kanban-tasks { display: flex; flex-direction: column; gap: 7px; }
+  .task-card { background: rgba(0,0,0,0.25); border: 1px solid var(--border); border-radius: 7px; padding: 9px 11px; transition: border-color 0.2s, background 0.2s; }
+  .task-card:hover { border-color: var(--accent); background: rgba(99,102,241,0.05); }
+  .task-name { font-size: 11px; color: var(--text); font-weight: 500; line-height: 1.4; margin-bottom: 5px; }
+  .task-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .task-list-tag { font-size: 9px; font-weight: 600; padding: 1px 5px; border-radius: 3px; background: var(--border); color: var(--text-muted); max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .task-priority { font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 3px; }
+  .pri-urgent { background: var(--red-dim); color: var(--red); } .pri-high { background: var(--orange-dim); color: var(--orange); } .pri-normal { background: var(--blue-dim); color: var(--blue); }
+  .task-link { font-size: 9px; color: var(--text-dim); text-decoration: none; } .task-link:hover { color: var(--accent-light); }
+  .infra-grid { display: grid; gap: 0; }
+  .infra-row { display: grid; grid-template-columns: 155px 1fr 85px 90px 130px; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+  .infra-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .infra-header-row { font-size: 10px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.6px; padding: 0 0 8px; border-bottom: 1px solid var(--border); }
+  .infra-name { font-size: 12px; font-weight: 600; color: var(--text); } .infra-url { font-size: 10px; color: var(--text-dim); font-family: var(--mono); margin-top: 2px; }
+  .infra-host-badge { font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 4px; background: var(--border); color: var(--text-muted); white-space: nowrap; }
+  .infra-action { font-size: 10px; color: var(--text-muted); } .infra-action.urgent { color: var(--red); font-weight: 600; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+  .status-live { background: var(--green); box-shadow: 0 0 6px var(--green); } .status-err { background: var(--red); } .status-warn { background: var(--yellow); }
+  .content-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 14px; }
+  .content-stat-card { background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; }
+  .content-stat-val { font-size: 24px; font-weight: 800; font-family: var(--mono); color: var(--text); letter-spacing: -1px; }
+  .content-stat-key { font-size: 10px; color: var(--text-muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .pipeline-phases { display: flex; flex-direction: column; gap: 7px; }
+  .phase-row { display: flex; align-items: center; gap: 10px; padding: 9px 12px; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 7px; }
+  .phase-num { width: 22px; height: 22px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; flex-shrink: 0; background: var(--accent-dim); color: var(--accent-light); }
+  .phase-name { flex: 1; font-size: 12px; color: var(--text); font-weight: 500; }
+  .phase-link { font-size: 10px; color: var(--text-dim); font-family: var(--mono); text-decoration: none; } .phase-link:hover { color: var(--accent-light); }
+  .spend-rows { display: flex; flex-direction: column; gap: 12px; }
+  .spend-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .spend-provider { font-size: 12px; font-weight: 600; color: var(--text); } .spend-amounts { font-size: 11px; color: var(--text-muted); font-family: var(--mono); }
+  .spend-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; } .spend-fill { height: 100%; border-radius: 2px; }
+  .total-spend { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .total-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; }
+  .total-val { font-size: 18px; font-weight: 800; font-family: var(--mono); color: var(--text); }
+  .metric-tiles { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+  .metric-tile { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .metric-val { font-size: 22px; font-weight: 800; font-family: var(--mono); color: var(--text); letter-spacing: -0.5px; }
+  .metric-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+  .metric-change { font-size: 11px; margin-top: 6px; font-weight: 600; }
+  .change-down { color: var(--red); } .change-flat { color: var(--text-muted); }
+  .section-label { font-size: 11px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; margin-bottom: -8px; }
+  .section-label::after { content:''; flex:1; height:1px; background: var(--border); }
+  .tag { display: inline-block; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 3px; background: var(--border); color: var(--text-muted); letter-spacing: 0.4px; text-transform: uppercase; }
+  .cu-link { font-size: 10px; color: var(--text-dim); text-decoration: none; font-family: var(--mono); } .cu-link:hover { color: var(--accent-light); }
+  .accent-glow { box-shadow: 0 0 20px rgba(99,102,241,0.1); }
+  .search-bar { background: var(--border); border: 1px solid var(--border-light); border-radius: 8px; padding: 6px 12px; font-size: 12px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 8px; }
+  .footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+  .footer-left { font-size: 11px; color: var(--text-dim); }
+  .footer-links { display: flex; gap: 20px; }
+  .footer-link { font-size: 11px; color: var(--text-dim); text-decoration: none; } .footer-link:hover { color: var(--accent-light); }
+  ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-track { background: var(--bg); } ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
+  @media (max-width:1400px) { .row-4{grid-template-columns:repeat(2,1fr);} .kanban{grid-template-columns:repeat(2,1fr);} .briefing-grid{grid-template-columns:1fr;} .metric-tiles{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:900px) { .row-2,.row-4{grid-template-columns:1fr;} .kanban{grid-template-columns:1fr 1fr;} .project-row{grid-template-columns:1fr 80px;} .infra-row{grid-template-columns:1fr 80px;} }
+  @media (max-width:600px) { .kanban{grid-template-columns:1fr;} .metric-tiles{grid-template-columns:1fr 1fr;} }
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="header-left">
+    <div class="header-logo">R</div>
+    <div>
+      <div class="header-title">Chief of Staff Dashboard</div>
+      <div class="header-sub">Rashida Mendes · 4 Businesses · AI-Powered Operations Center</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="search-bar">⌘ Quick access...</div>
+    <div class="live-badge"><div class="live-dot"></div>Live Data</div>
+    <div class="header-date" id="currentDate"></div>
+  </div>
+</header>
+<div class="alert-banner">
+  <span class="alert-icon">🚨</span>
+  <div class="alert-items">
+    <div class="alert-item"><span class="alert-urgent">URGENT</span><a href="https://app.clickup.com/t/86e0r5g2x" target="_blank">💳 Pay Shopify Bill — FGS store PAUSED, $0 revenue</a></div>
+    <div class="alert-item"><span class="alert-urgent">URGENT</span><a href="https://app.clickup.com/t/86e0r5g3d" target="_blank">💳 Pay Supabase Invoice — databases offline (FF-31)</a></div>
+    <div class="alert-item"><span class="alert-urgent">URGENT</span><a href="https://app.clickup.com/t/86e0rmuu0" target="_blank">🔥 Activate FGS Engine repo → wire to Shopify</a></div>
+    <div class="alert-item"><span class="alert-urgent">URGENT</span><a href="https://app.clickup.com/t/86e0r5gbk" target="_blank">💰 Create GHL product for CMO Command Center @ $97 — app is LIVE now</a></div>
+  </div>
+</div>
+<div class="main">
+<div class="metric-tiles">
+  <div class="metric-tile"><div class="metric-val" style="color:var(--red)">$0</div><div class="metric-label">FGS MTD Revenue</div><div class="metric-change change-down">⬇ Store paused — Shopify bill unpaid</div></div>
+  <div class="metric-tile"><div class="metric-val" style="color:var(--yellow)">$97</div><div class="metric-label">Next Revenue Event</div><div class="metric-change change-flat">→ CMO Command Center · App live, needs GHL product</div></div>
+  <div class="metric-tile"><div class="metric-val">4</div><div class="metric-label">Active Businesses</div><div class="metric-change change-flat">→ Funded First · FGS · Insight Profit · 2nd Spring</div></div>
+  <div class="metric-tile"><div class="metric-val" style="color:var(--orange)">7</div><div class="metric-label">Urgent ClickUp Tasks</div><div class="metric-change change-flat">→ 30+ total open · Workspace 14233858</div></div>
+</div>
+
+  <!-- DAILY BRIEFING -->
+  <div class="section-label">📋 Daily Briefing · Saturday, April 18, 2026</div>
+  <div class="card accent-glow">
+    <div class="card-header">
+      <div class="card-title"><span>☀️</span> Morning Command Brief</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="tag">Saturday</span>
+        <span class="card-badge" id="briefTime">Loading...</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="briefing-grid">
+        <div>
+          <div class="briefing-section-title">🎯 Top 3 Priorities Today</div>
+          <div class="priority-item">
+            <div class="priority-num p1">1</div>
+            <div>
+              <div class="priority-text">Pay Shopify + Supabase bills immediately</div>
+              <div class="priority-sub">Both blocking active revenue. FGS store at $0 until Shopify is paid. Self-hosted Supabase invoice outstanding per FF-31.</div>
+            </div>
+          </div>
+          <div class="priority-item">
+            <div class="priority-num p2">2</div>
+            <div>
+              <div class="priority-text">Create CMO Command Center GHL product at $97</div>
+              <div class="priority-sub">App is already LIVE at <a href="https://command-center-rouge-pi.vercel.app" target="_blank" style="color:var(--accent-light);text-decoration:none">command-center-rouge-pi.vercel.app</a>. Just needs GHL order form to start selling. (FF-30)</div>
+            </div>
+          </div>
+          <div class="priority-item">
+            <div class="priority-num p3">3</div>
+            <div>
+              <div class="priority-text">Kick off Genspark KB extraction — Phase 1 Wiki.js</div>
+              <div class="priority-sub">~390 Genspark chats sitting unextracted. KB pipeline defined in 4 phases. Start with Oracle VPS Wiki.js setup today.</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="briefing-section-title">🤔 Pending Decisions</div>
+          <div class="decision-item">
+            <div class="decision-q">Which lead-gen calculator to build first?</div>
+            <div class="decision-context">30+ web app tools in ClickUp pipeline. Email ROI, Freelance Rate, and E-Commerce Analyzer are all marked URGENT. Pick your top 3 for Claude to build this week for Funded First lead gen.</div>
+          </div>
+          <div class="decision-item">
+            <div class="decision-q">Liberty University Aviation — enroll June 2026?</div>
+            <div class="decision-context">PPL program application task open (#86e0r5gac). Decision needed on timing before May enrollment deadline. Also need OBAP membership decision for Delta pipeline.</div>
+          </div>
+          <div class="decision-item">
+            <div class="decision-q">ShineOn or Printify — primary FGS POD platform?</div>
+            <div class="decision-context">Both set up tasks open. ShineOn = jewelry message cards (Wife/Love Knot). Printify = broader catalog. Choose primary after Shopify bill paid.</div>
+          </div>
+        </div>
+        <div>
+          <div class="briefing-section-title">🚧 Active Blockers</div>
+          <div class="blocker-item">
+            <div class="blocker-icon">🏪</div>
+            <div>
+              <div class="blocker-text">Family Gift Studio — store fully paused</div>
+              <div class="blocker-impact">Blocked by: unpaid Shopify invoice → $0 revenue until paid</div>
+            </div>
+          </div>
+          <div class="blocker-item">
+            <div class="blocker-icon">🔴</div>
+            <div>
+              <div class="blocker-text">VidRevamp — runtime HTTP 500 on Vercel</div>
+              <div class="blocker-impact">Blocked by: server error → video content dispatch route broken (#86e0wzwr6)</div>
+            </div>
+          </div>
+          <div class="blocker-item">
+            <div class="blocker-icon">✍️</div>
+            <div>
+              <div class="blocker-text">Elite Writer — never deployed to Vercel</div>
+              <div class="blocker-impact">Blocked by: missing deployment → publication writing route completely broken (#86e0wzwye)</div>
+            </div>
+          </div>
+          <div class="blocker-item">
+            <div class="blocker-icon">⚙️</div>
+            <div>
+              <div class="blocker-text">FGS Vercel Engine — build ERROR</div>
+              <div class="blocker-impact">Blocked by: Vercel build failure → AI product engine not wired to Shopify (#86e0wzx3x)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVENUE TRACKER -->
+  <div class="section-label">💰 Revenue Tracker · April 2026</div>
+  <div class="row row-4">
+    <div class="biz-card funded">
+      <div class="biz-header">
+        <div>
+          <div class="biz-name">Funded First</div>
+          <div class="biz-type">Fractional CMO · Consulting · Digital Offers</div>
+        </div>
+        <div style="text-align:right">
+          <div class="biz-amount" style="color:var(--yellow)">Pre-Sales</div>
+          <div class="biz-label">MTD Revenue</div>
+        </div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill fill-yellow" style="width:15%"></div></div>
+      <div class="biz-stats">
+        <div><div class="biz-stat-val" style="color:var(--accent-light)">$97</div><div class="biz-stat-key">CMO Center Price</div></div>
+        <div><div class="biz-stat-val">30</div><div class="biz-stat-key">LinkedIn Posts Ready</div></div>
+        <div><div class="biz-stat-val" style="color:var(--green)">✅ Live</div><div class="biz-stat-key">App Deployed</div></div>
+        <div><div class="biz-stat-val" style="color:var(--red)">Missing</div><div class="biz-stat-key">GHL Order Form</div></div>
+      </div>
+      <div class="biz-next-event">🎯 <strong>Next revenue event:</strong> Create GHL product → launch $97 CMO Command Center this weekend</div>
+    </div>
+    <div class="biz-card insight">
+      <div class="biz-header">
+        <div>
+          <div class="biz-name">Insight Profit</div>
+          <div class="biz-type">AI Platform · KB · Knowledge Products</div>
+        </div>
+        <div style="text-align:right">
+          <div class="biz-amount" style="color:var(--blue)">Active</div>
+          <div class="biz-label">Infrastructure</div>
+        </div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill fill-green" style="width:60%"></div></div>
+      <div class="biz-stats">
+        <div><div class="biz-stat-val" style="color:var(--green)">✅ Live</div><div class="biz-stat-key">KB + Command Ctr</div></div>
+        <div><div class="biz-stat-val">~390</div><div class="biz-stat-key">Genspark Backlog</div></div>
+        <div><div class="biz-stat-val" style="color:var(--green)">✅ Running</div><div class="biz-stat-key">PopeBot + Polsia</div></div>
+        <div><div class="biz-stat-val" style="color:var(--yellow)">⚠️ Bill</div><div class="biz-stat-key">Supabase Invoice</div></div>
+      </div>
+      <div class="biz-next-event">🎯 <strong>Next:</strong> KB extraction pipeline → Phase 1 Oracle/Wiki.js setup → monetize knowledge</div>
+    </div>
+    <div class="biz-card fgs">
+      <div class="biz-header">
+        <div>
+          <div class="biz-name">Family Gift Studio</div>
+          <div class="biz-type">Shopify · Print-on-Demand · ShineOn · Printify</div>
+        </div>
+        <div style="text-align:right">
+          <div class="biz-amount" style="color:var(--red)">$0</div>
+          <div class="biz-label">MTD — Store PAUSED</div>
+        </div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill fill-red" style="width:2%"></div></div>
+      <div class="biz-stats">
+        <div><div class="biz-stat-val" style="color:var(--red)">PAUSED</div><div class="biz-stat-key">Shopify Store</div></div>
+        <div><div class="biz-stat-val">5 SKUs</div><div class="biz-stat-key">ShineOn Ready</div></div>
+        <div><div class="biz-stat-val" style="color:var(--red)">ERROR</div><div class="biz-stat-key">Vercel Engine</div></div>
+        <div><div class="biz-stat-val" style="color:var(--yellow)">Pending</div><div class="biz-stat-key">Email Sequences</div></div>
+      </div>
+      <div class="biz-next-event">🔴 <strong>BLOCKER:</strong> Pay Shopify → activate → upload 5 Wife/Love Knot jewelry SKUs to ShineOn</div>
+    </div>
+    <div class="biz-card spring">
+      <div class="biz-header">
+        <div><div class="biz-name">Second Spring</div><div class="biz-type">Women's Wellness · Balance Sync App</div></div>
+        <div style="text-align:right">
+          <div class="biz-amount" style="color:var(--text-muted)">Pre-Rev</div>
+          <div class="biz-label">In Development</div>
+        </div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill fill-accent" style="width:25%"></div></div>
+      <div class="biz-stats">
+        <div><div class="biz-stat-val" style="color:var(--yellow)">Planning</div><div class="biz-stat-key">Current Phase</div></div>
+        <div><div class="biz-stat-val">Q3 2026</div><div class="biz-stat-key">Target Launch</div></div>
+        <div><div class="biz-stat-val">✅</div><div class="biz-stat-key">ClickUp Folder</div></div>
+        <div><div class="biz-stat-val">TBD</div><div class="biz-stat-key">MVP Scope</div></div>
+      </div>
+      <div class="biz-next-event">🎯 <strong>Next:</strong> Define MVP scope for Balance Sync → prioritize after FGS and Funded First cash flow</div>
+    </div>
+  </div>
+
+  <!-- PROJECT STATUS BOARD -->
+  <div class="section-label">📊 Project Status Board · All Active Projects</div>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><span>🗂️</span> 12 Active Projects</div>
+      <div style="display:flex;gap:8px">
+        <span class="pill green"><span class="pill-dot"></span>On Track</span>
+        <span class="pill yellow"><span class="pill-dot"></span>At Risk</span>
+        <span class="pill red"><span class="pill-dot"></span>Blocked</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="project-grid">
+        <div class="project-row project-header-row">
+          <div>Project</div><div>Health</div><div>Business</div><div>Next Action</div><div>Owner</div><div>Updated</div>
+        </div>
+        <div class="project-row">
+          <div><div class="project-name">CMO Command Center</div><div class="project-biz">Fractional CMO SaaS $97</div></div>
+          <div><span class="pill yellow"><span class="pill-dot"></span>At Risk</span></div>
+          <div><span class="tag">Funded First</span></div>
+          <div class="project-next">Create GHL product + order form. App LIVE at <a href="https://command-center-rouge-pi.vercel.app" target="_blank" class="cu-link">vercel.app</a>. <a href="https://app.clickup.com/t/86e0r5gbk" class="cu-link" target="_blank">FF-30</a></div>
+          <div><span class="project-owner owner-r">Rashida</span></div>
+          <div class="project-updated">Apr 15</div>
+        </div>
+        <div class="project-row">
+          <div><div class="project-name">KB Extraction Pipeline</div><div class="project-biz">Genspark → Knowledge Base</div></div>
+          <div><span class="pill yellow"><span class="pill-dot"></span>Pending</span></div>
+          <div><span class="tag">Insight Profit</span></div>
+          <div class="project-next">Phase 1: Wiki.js on Oracle VPS → batch extract 5-10 Genspark chats → scale to ~390 remaining. <a href="https://app.clickup.com/t/86e0d8c01" class="cu-link" target="_blank">#86e0d8c01</a></div>
+          <div><span class="project-owner owner-both">Both</span></div>
+          <div class="project-updated">Apr 15</div>
+        </div>
+        <div class="project-row">
+          <div><div class="project-name">Family Gift Studio Launch</div><div class="project-biz">Shopify + ShineOn + Printify</div></div>
+          <div><span class="pill red"><span class="pill-dot"></span>Blocked</span></div>
+          <div><span class="tag">FGS</span></div>
+          <div class="project-next">⚠️ Pay Shopify → activate → upload 5 Wife/Love Knot jewelry SKUs to ShineOn → set up Printify → wire FGS Engine. <a href="https://app.clickup.com/t/86e0r5g2x" class="cu-link" target="_blank">#86e0r5g2x</a></div>
+          <div><span class="project-owner owner-r">Rashida</span></div>
+          <div class="project-updated">Apr 15</div>
+        </div>
+        <div class="project-row">
+          <div><div class="project-name">Lead Gen Calculator Suite</div><div class="project-biz">30+ Web App Tools</div></div>
+          <div><span class="pill yellow"><span class="pill-dot"></span>In Backlog</span></div>
+          <div><span class="tag">Funded First</span></div>
+          <div class="project-next">30+ tools spec'd. Priority: Email ROI → Freelance Rate → E-Commerce Analyzer → Home Affordability → FIRE Calculator. <a href="https://app.clickup.com/t/86e0r76nr" class="cu-link" target="_blank">#86e0r76nr</a></div>
+          <div><span class="project-owner owner-ai">AI</span></div>
+          <div class="project-updated">Apr 15</div>
+        </div>
+        <div class="project-row">
+          <div><div class="project-name">LinkedIn Authority Build</div><div class="project-biz">30-Post Content Calendar</div></div>
+          <div><span class="pill yellow"><span class="pill-dot"></span>Ready to Launch</span></div>
+          <div><span class="tag">Funded First</span></div>
+          <div class="project-next">30 posts ready. Set up auto-publish → fractional CMO positioning → drive to $97 CMO Command Center product. <a href="https://app.clickup.com/t/86e0r5g9m" class="cu-link" target="_blank">FF-32</a></div>
+          <div><span class="project-owner owner-both">Both</span></div>
+          <div class="project-updated">Apr 15</div>
+        </div>
+        <div class="project-row">
+          <div><div class="project-name">PopeBot / ClaudeClaw v2</div><div class="project-biz">AI Dispatch + ClickUp Polling</div></div>
+          <div><span class="pill green"><span class="pill-dot"></span>Live</span></div>
+          <div><span class="tag">Insight Profit</span></div>
+          <div class="project-next">Running on Railway. Dispatch routing confirmed Apr 13. Monitor uptime. Wire Elite Writer route (currently broken 503). <a href="https://thepopebot-production-e881.up.railway.app" class="cu-link" target="_blank">↗ View</a></div>
+          <div><span class="project-owner owner-ai">AI</span></div>
+          <div class="project-updated">Apr 14</div>
+        </div>
+        <div class="project-row">
+          <div><div class="project-name">VidRevamp Fix</div><div class="project-biz">Video Content Platform</div></div>
+          <div><span class="pill red"><span class="pill-dot"></span>Blocked</span></div>
+          <div><span class="tag">Insight Profit</span></div>
+          <div class="project-next">Runtime HTTP 500 on Vercel. Check runtime logs → identify server error → fix → restore video_content dispatch route. <a href="https://app.clickup.com/t/86e0wzwr6" class="cu-link" target="_blank">#86e0wzwr6</a></div>
+          <div><span class="project-owner owner-ai">AI</span></div>
+          <div class="project-updated">Apr 14</div>
+        </div>
+        <div class="project-row">
+          <div><div class="project-name">Elite Writer Deploy</div><div class="project-biz">Publication Writing Agent</div></div>
+          <div><span class="pill red"><span class="pill-dot"></span>Blocked</span></div>
+          <div><span class="tag">Insight Profit</span></div>
+          <div class="project-next">Never deployed. Connect GitHub repo → set env vars → deploy to Vercel → assign elite-writer-app.insightprofit.live. <a href="https://app.clickup.com/t/86e0wzwye" class="cu-link" target="_blank">#86e0wzwye</a></div>
+          <div><span class="project-owner owner-ai">AI</span></div>
+          <div class="project-updated">Apr 14</div>
+        </div>
+        <div class="project-row">
+          <div><div class="project-name">FGS Email Sequences</div><div class="project-biz">Klaviyo / GHL Automation</div></div>
+          <div><span class="pill yellow"><span class="pill-dot"></span>Pending</span></div>
+          <div><span class="tag">FGS</span></div>
+          <div class="project-next">Set up Klaviyo/GHL sequences for first product launch. Target 40% revenue from email. Activate after Shopify bill paid. <a href="https://app.clickup.com/t/86e0r5gcm" class="cu-link" target="_blank">#86e0r5gcm</a></div>
+          <div><span class="project-owner owner-both">Both</span></div>
+          <div class="project-updated">Apr 15</div>
+        </div>
+        <div class="project-row">
+          <div><div class="project-name">Aviation Career — PPL</div><div class="project-biz">Delta Airline Pipeline</div></div>
+          <div><span class="pill yellow"><span class="pill-dot"></span>Planning</span></div>
+          <div><span class="tag">Personal</span></div>
+          <div class="project-next">Apply to Liberty University Aviation for June 2026 PPL start. Apply to OBAP (key Delta pipeline). Enrollment decision needed by May. <a href="https://app.clickup.com/t/86e0r5gac" class="cu-link" target="_blank">#86e0r5gac</a></div>
+          <div><span class="project-owner owner-r">Rashida</span></div>
+          <div class="project-updated">Apr 15</div>
+        </div>
+        <div class="project-row">
+          <div><div class="project-name">Second Spring App</div><div class="project-biz">Women's Wellness / Balance Sync</div></div>
+          <div><span class="pill yellow"><span class="pill-dot"></span>Planning</span></div>
+          <div><span class="tag">Second Spring</span></div>
+          <div class="project-next">ClickUp folder active (🌸 Second Spring / Balance Sync). Define MVP scope, tech stack, and Q3 2026 launch timeline when bandwidth opens.</div>
+          <div><span class="project-owner owner-both">Both</span></div>
+          <div class="project-updated">Feb 19</div>
+        </div>
+        <div class="project-row">
+          <div><div class="project-name">$30K/Day Rev Dashboard</div><div class="project-biz">Cross-Business Revenue Tracking</div></div>
+          <div><span class="pill red"><span class="pill-dot"></span>Not Started</span></div>
+          <div><span class="tag">All Biz</span></div>
+          <div class="project-next">Build $30K/day real-time revenue tracking dashboard across all 4 businesses. Marked urgent in ClickUp. <a href="https://app.clickup.com/t/86e0rmuwr" class="cu-link" target="_blank">#86e0rmuwr</a></div>
+          <div><span class="project-owner owner-ai">AI</span></div>
+          <div class="project-updated">Apr 15</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TASK PIPELINE KANBAN -->
+  <div class="section-label">📋 Task Pipeline · Live from ClickUp Workspace 14233858</div>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><span>⚡</span> Kanban — Real Tasks from ClickUp</div>
+      <a href="https://app.clickup.com/14233858/home" target="_blank" style="font-size:11px;color:var(--text-dim);text-decoration:none">Open Workspace →</a>
+    </div>
+    <div class="card-body">
+      <div class="kanban">
+        <!-- DO TODAY -->
+        <div>
+          <div class="kanban-col-header kanban-now">🔥 Do Today <span class="col-count">7</span></div>
+          <div class="kanban-tasks">
+            <div class="task-card">
+              <div class="task-name">💳 PAY SHOPIFY BILL — Store paused, zero revenue</div>
+              <div class="task-meta"><span class="task-list-tag">Products &amp; SKUs</span><span class="task-priority pri-urgent">URGENT</span><a href="https://app.clickup.com/t/86e0r5g2x" class="task-link" target="_blank">#86e0r5g2x</a></div>
+            </div>
+            <div class="task-card">
+              <div class="task-name">💳 PAY SUPABASE INVOICE — databases offline until paid</div>
+              <div class="task-meta"><span class="task-list-tag">Supabase &amp; Vercel</span><span class="task-priority pri-urgent">URGENT</span><a href="https://app.clickup.com/t/86e0r5g3d" class="task-link" target="_blank">FF-31</a></div>
+            </div>
+            <div class="task-card">
+              <div class="task-name">🔥 ACTIVATE family-gift-studio-engine — wire to Shopify</div>
+              <div class="task-meta"><span class="task-list-tag">GitHub Repos</span><span class="task-priority pri-urgent">URGENT</span><a href="https://app.clickup.com/t/86e0rmuu0" class="task-link" target="_blank">#86e0rmuu0</a></div>
+            </div>
+            <div class="task-card">
+              <div class="task-name">🔥 Set up $30K/day revenue tracking dashboard</div>
+              <div class="task-meta"><span class="task-list-tag">Revenue Dashboard</span><span class="task-priority pri-urgent">URGENT</span><a href="https://app.clickup.com/t/86e0rmuwr" class="task-link" target="_blank">#86e0rmuwr</a></div>
+            </div>
+            <div class="task-card">
+              <div class="task-name">💰 Create GHL product + order form CMO Command Center $97 — app already live</div>
+              <div class="task-meta"><span class="task-list-tag">GoHighLevel Products</span><span class="task-priority pri-high">HIGH</span><a href="https://app.clickup.com/t/86e0r5gbk" class="task-link" target="_blank">FF-30</a></div>
+            </div>
+            <div class="task-card">
+              <div class="task-name">💌 LinkedIn auto-publish 30 posts — fractional CMO positioning</div>
+              <div class="task-meta"><span class="task-list-tag">LinkedIn Authority</span><span class="task-priority pri-high">HIGH</span><a href="https://app.clickup.com/t/86e0r5g9m" class="task-link" target="_blank">FF-32</a></div>
+            </div>
+            <div class="task-card">
+              <div class="task-name">🌺 Set up ShineOn — upload 5 jewelry products (Wife/Love Knot)</div>
+              <div class="task-meta"><span class="task-list-tag">ShineOn Setup</span><span class="task-priority pri-high">HIGH</span><a href="https://app.clickup.com/t/86e0r5g6x" class="task-link" target="_blank">#86e0r5g6x</a></div>
+            </div>
+          </div>
+        </div>
+        <!-- THIS WEEK -->
+        <div>
+          <div class="kanban-col-header kanban-week">📅 This Week <span class="col-count">8</span></div>
+          <div class="kanban-tasks">
+            <div class="task-card">
+              <div class="task-name">📧 Email Marketing ROI Calculator — lead gen tool #1</div>
+              <div class="task-meta"><span class="task-list-tag">Web App Tools</span><span class="task-priority pri-urgent">URGENT</span><a href="https://app.clickup.com/t/86e0r76nr" class="task-link" target="_blank">#86e0r76nr</a></div>
+            </div>
+            <div class="task-card">
+              <div class="task-name">💼 Freelance Rate &amp; Profitability Calculator</div>
+              <div class="task-meta"><span class="task-list-tag">Web App Tools</span><span class="task-priority pri-urgent">URGENT</span><a href="https://app.clickup.com/t/86e0r76n7" class="task-link" target="_blank">#86e0r76n7</a></div>
+            </div>
+            <div class="task-card">
+              <div class="task-name">🛒 E-Commerce Ad Spend ROI Analyzer</div>
+              <div class="task-meta"><span class="task-list-tag">Web App Tools</span><span class="task-priority pri-urgent">URGENT</span><a href="https://app.clickup.com/t/86e0r76mz" class="task-link" target="_blank">#86e0r76mz</a></div>
+            </div>
+            <div class="task-card">
+              <div class="task-name">🎨 Set up Printify — connect to Shopify when reactivated</div>
+              <div class="task-meta"><span class="task-list-tag">Printify Setup</span><span class="task-priority pri-high">HIGH</span><a href="https://app.clickup.com/t/86e0r5g8g" class="task-link" target="_blank">#86e0r5g8g</a></div>
+            </div>
+            <div class="task-card">
+              <div class="task-name">Phase 1: Set up Wiki.js on Oracle VPS (KB pipeline)</div>
+              <div class="task-meta"><span class="task-list-tag">KB Extraction</span><span class="task-priority pri-high">HIGH</span><a href="https://app.clickup.com/t/86e0d8c01" class="task-link" target="_blank">#86e0d8c01</a></div>
+            </div>
+            <div class="task-card">
+              <div class="task-name">📧 Set up Klaviyo/GHL email sequences for first FGS product launch — 40% rev from email</div>
+              <div class="task-meta"><span class="task-list-tag">Email Sequences</span><span class="task-priority pri-high">HIGH</span><a href="https://app.clickup.com/t/86e0r5gcm" class="task-link" target="_blank">#86e0r5gcm</a></div>
+            </div>
+            <div class="task-card">
+              <div class="task-name">🎓 Contact Liberty University Aviation — PPL June 2026</div>
+              <div class="task-meta"><span class="task-list-tag">Liberty University</span><span class="task-priority pri-high">HIGH</span><a href="https://app.clickup.com/t/86e0r5gac" class="task-link" target="_blank">#86e0r5gac</a></div>
+            </div>
+            <div class="task-card">
+              <div class="task-name">📋 Apply OBAP membership — key Delta airline pipeline</div>
+              <div class="task-meta"><span class="task-list-tag">Delta Prep (ATP)</span><span class="task-priority pri-high">HIGH</span><a href="https://app.clickup.com/t/86e0r5gb5" class="task-link" target="_blank">#86e0r5gb5</a></div>
+            </div>
+          </div>
+        </div>
+        <!-- BACKLOG -->
+        <div>
+          <div class="kanban-col-header kanban-backlog">📦 Backlog <span class="col-count">30+</span></div>
+          <div class="kanban-tasks">
+            <div class="task-card">
+              <div class="task-name">Phase 2: Extract Genspark chats (test batch 5-10)</div>
+              <div class="task-meta"><span class="task-list-tag">KB Pipeline</span><span class="task-priority pri-high">HIGH</span><a href="https://app.clickup.com/t/86e0d8c0x" class="task-link" target="_blank">#86e0d8c0x</a></div>
+            </div>
+            <div class="task-card">
+              <div class="task-name">Phase 3: Scale Genspark extraction (~390 remaining)</div>
+              <div class="task-meta"><span class="task-list-tag">KB Pipeline</span><span class="task-priority pri-normal">NORMAL</span><a href="https://app.clickup.com/t/86e0d8c34" class="task-link" target="_blank">#86e0d8c34</a></div>
+            </div>
+            <div class="task-card">
+              <div class="task-name">Phase 4: Extract Manus.ai content</div>
+              <div class="task-meta"><span class="task-list-tag">KB Pipeline</span><span class="task-priority pri-normal">NORMAL</span><a href="https://app.clickup.com/t/86e0d8c48" class="task-link" target="_blank">#86e0d8c48</a></div>
+            </div>
+            <div class="task-card">
+              <div class="task-name">🏠 Rental Property ROI Calculator</div>
+              <div class="task-meta"><span class="task-list-tag">Web App Tools</span><span class="task-priority pri-high">HIGH</span><a href="https://app.clickup.com/t/86e0r76my" class="task-link" target="_blank">#86e0r76my</a></div>
+            </div>
+            <div class="task-card">
+              <div class="task-name">🔥 FIRE Number &amp; Early Retirement Calculator</div>
+              <div class="task-meta"><span class="task-list-tag">Web App Tools</span><span class="task-priority pri-high">HIGH</span><a href="https://app.clickup.com/t/86e0r76n3" class="task-link" target="_blank">#86e0r76n3</a></div>
+            </div>
+            <div class="task-card">
+              <div class="task-name">🏡 Home Affordability Calculator</div>
+              <div class="task-meta"><span class="task-list-tag">Web App Tools</span><span class="task-priority pri-urgent">URGENT</span><a href="https://app.clickup.com/t/86e0rpqp5" class="task-link" target="_blank">#86e0rpqp5</a></div>
+            </div>
+            <div class="task-card">
+              <div class="task-name">Funded First Website Articles + branding guidelines</div>
+              <div class="task-meta"><span class="task-list-tag">Funded First List</span><span class="task-priority pri-normal">NORMAL</span><a href="https://app.clickup.com/t/86dyyv3n2" class="task-link" target="_blank">#86dyyv3n2</a></div>
+            </div>
+            <div class="task-card">
+              <div class="task-name">+ 22 more lead gen calculators + other projects in pipeline</div>
+              <div class="task-meta"><span class="task-list-tag">ClickUp Workspace</span><a href="https://app.clickup.com" class="task-link" target="_blank">View all →</a></div>
+            </div>
+          </div>
+        </div>
+        <!-- BLOCKED -->
+        <div>
+          <div class="kanban-col-header kanban-blocked">🚫 Blocked <span class="col-count">4</span></div>
+          <div class="kanban-tasks">
+            <div class="task-card" style="border-color:rgba(239,68,68,0.3)">
+              <div class="task-name">🔴 VidRevamp — runtime HTTP 500 on Vercel</div>
+              <div class="task-meta"><span class="task-list-tag">Vercel Deploys</span><span class="task-priority pri-high">HIGH</span><a href="https://app.clickup.com/t/86e0wzwr6" class="task-link" target="_blank">#86e0wzwr6</a></div>
+              <div style="font-size:10px;color:var(--red);margin-top:5px">Fix: Check Vercel runtime logs → identify 500 cause → patch server</div>
+            </div>
+            <div class="task-card" style="border-color:rgba(239,68,68,0.3)">
+              <div class="task-name">🔴 Elite Writer — 503 / never deployed to Vercel</div>
+              <div class="task-meta"><span class="task-list-tag">Infrastructure</span><span class="task-priority pri-high">HIGH</span><a href="https://app.clickup.com/t/86e0wzwye" class="task-link" target="_blank">#86e0wzwye</a></div>
+              <div style="font-size:10px;color:var(--red);margin-top:5px">Fix: Connect GitHub → set env vars from Keys Vault → deploy to Vercel → assign domain</div>
+            </div>
+            <div class="task-card" style="border-color:rgba(239,68,68,0.3)">
+              <div class="task-name">🔴 FGS Vercel Engine — build ERROR</div>
+              <div class="task-meta"><span class="task-list-tag">GitHub / Vercel</span><span class="task-priority pri-urgent">URGENT</span><a href="https://app.clickup.com/t/86e0wzx3x" class="task-link" target="_blank">#86e0wzx3x</a></div>
+              <div style="font-size:10px;color:var(--red);margin-top:5px">Fix: Check Vercel build logs on family-gift-studio-engine → fix compilation errors</div>
+            </div>
+            <div class="task-card" style="border-color:rgba(239,68,68,0.3)">
+              <div class="task-name">🔴 publication_writing dispatch route broken</div>
+              <div class="task-meta"><span class="task-list-tag">Dispatch Map</span><span class="task-priority pri-high">HIGH</span></div>
+              <div style="font-size:10px;color:var(--red);margin-top:5px">Blocked by: Elite Writer 503. All article/blog/pitch dispatch requests fail until Elite Writer is deployed.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INFRASTRUCTURE + CONTENT ENGINE -->
+  <div class="section-label">⚙️ Infrastructure Health &amp; Content Engine</div>
+  <div class="row row-2">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span>🖥️</span> Infrastructure Health</div>
+        <div style="display:flex;gap:6px">
+          <span class="pill green"><span class="pill-dot"></span>6 Live</span>
+          <span class="pill yellow"><span class="pill-dot"></span>1 Warn</span>
+          <span class="pill red"><span class="pill-dot"></span>3 Error</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="infra-grid">
+          <div class="infra-row infra-header-row">
+            <div>Service</div><div>URL</div><div>Host</div><div>Status</div><div>Action</div>
+          </div>
+          <div class="infra-row">
+            <div><div class="infra-name">Knowledge Base</div><div class="infra-url">kb.insightprofit.live</div></div>
+            <div><a href="https://kb.insightprofit.live" target="_blank" style="color:var(--text-dim);font-size:11px;text-decoration:none">↗ Open</a></div>
+            <div><span class="infra-host-badge">Vercel</span></div>
+            <div><span class="status-dot status-live"></span><span style="color:var(--green);font-size:11px;font-weight:600">Live ✅</span></div>
+            <div class="infra-action">✓ Nextra + Neon</div>
+          </div>
+          <div class="infra-row">
+            <div><div class="infra-name">Command Center</div><div class="infra-url">center.insightprofit.live</div></div>
+            <div><a href="https://center.insightprofit.live" target="_blank" style="color:var(--text-dim);font-size:11px;text-decoration:none">↗ Open</a></div>
+            <div><span class="infra-host-badge">Vercel</span></div>
+            <div><span class="status-dot status-live"></span><span style="color:var(--green);font-size:11px;font-weight:600">Live ✅</span></div>
+            <div class="infra-action">DNS fixed Apr 14 ✅</div>
+          </div>
+          <div class="infra-row">
+            <div><div class="infra-name">CMO Command Center</div><div class="infra-url">command-center-rouge-pi.vercel.app</div></div>
+            <div><a href="https://command-center-rouge-pi.vercel.app" target="_blank" style="color:var(--text-dim);font-size:11px;text-decoration:none">↗ Open</a></div>
+            <div><span class="infra-host-badge">Vercel</span></div>
+            <div><span class="status-dot status-live"></span><span style="color:var(--green);font-size:11px;font-weight:600">Live ✅</span></div>
+            <div class="infra-action">Needs GHL product!</div>
+          </div>
+          <div class="infra-row">
+            <div><div class="infra-name">PopeBot</div><div class="infra-url">thepopebot…railway.app</div></div>
+            <div><a href="https://thepopebot-production-e881.up.railway.app" target="_blank" style="color:var(--text-dim);font-size:11px;text-decoration:none">↗ Open</a></div>
+            <div><span class="infra-host-badge">Railway</span></div>
+            <div><span class="status-dot status-live"></span><span style="color:var(--green);font-size:11px;font-weight:600">Live ✅</span></div>
+            <div class="infra-action">✓ Groq/ClaudeClaw</div>
+          </div>
+          <div class="infra-row">
+            <div><div class="infra-name">Polsia API</div><div class="infra-url">polsia-production.railway.app</div></div>
+            <div><a href="https://polsia-production.up.railway.app" target="_blank" style="color:var(--text-dim);font-size:11px;text-decoration:none">↗ Open</a></div>
+            <div><span class="infra-host-badge">Railway</span></div>
+            <div><span class="status-dot status-live"></span><span style="color:var(--green);font-size:11px;font-weight:600">Live ✅</span></div>
+            <div class="infra-action">✓ AI model endpoints</div>
+          </div>
+          <div class="infra-row">
+            <div><div class="infra-name">Oracle Server</div><div class="infra-url">129.213.162.114</div></div>
+            <div><span style="color:var(--text-dim);font-size:11px">Coolify · n8n · Docmost</span></div>
+            <div><span class="infra-host-badge">Oracle Cloud</span></div>
+            <div><span class="status-dot status-live"></span><span style="color:var(--green);font-size:11px;font-weight:600">Running ✅</span></div>
+            <div class="infra-action">Free tier · Self-host</div>
+          </div>
+          <div class="infra-row">
+            <div><div class="infra-name">Supabase (self-hosted)</div><div class="infra-url">supabase.insightprofit.live</div></div>
+            <div><a href="https://supabase.insightprofit.live" target="_blank" style="color:var(--text-dim);font-size:11px;text-decoration:none">↗ Open</a></div>
+            <div><span class="infra-host-badge">Oracle</span></div>
+            <div><span class="status-dot status-warn"></span><span style="color:var(--yellow);font-size:11px;font-weight:600">⚠️ Invoice</span></div>
+            <div class="infra-action urgent">Pay invoice FF-31</div>
+          </div>
+          <div class="infra-row">
+            <div><div class="infra-name">Family Gift Studio</div><div class="infra-url">familygiftstudio.com</div></div>
+            <div><a href="https://familygiftstudio.com" target="_blank" style="color:var(--text-dim);font-size:11px;text-decoration:none">↗ Open</a></div>
+            <div><span class="infra-host-badge">Shopify</span></div>
+            <div><span class="status-dot status-warn"></span><span style="color:var(--yellow);font-size:11px;font-weight:600">⚠️ Paused</span></div>
+            <div class="infra-action urgent">Pay bill → activate</div>
+          </div>
+          <div class="infra-row">
+            <div><div class="infra-name">FGS Vercel Engine</div><div class="infra-url">family-gift-studio-engine…</div></div>
+            <div><a href="https://family-gift-studio-engine-rashida-mendes-projects.vercel.app" target="_blank" style="color:var(--text-dim);font-size:11px;text-decoration:none">↗ Open</a></div>
+            <div><span class="infra-host-badge">Vercel</span></div>
+            <div><span class="status-dot status-err"></span><span style="color:var(--red);font-size:11px;font-weight:600">Build ERR 🔴</span></div>
+            <div class="infra-action urgent">Fix build #86e0wzx3x</div>
+          </div>
+          <div class="infra-row">
+            <div><div class="infra-name">VidRevamp</div><div class="infra-url">vidrevamp.vercel.app</div></div>
+            <div><a href="https://vidrevamp.vercel.app" target="_blank" style="color:var(--text-dim);font-size:11px;text-decoration:none">↗ Open</a></div>
+            <div><span class="infra-host-badge">Vercel</span></div>
+            <div><span class="status-dot status-err"></span><span style="color:var(--red);font-size:11px;font-weight:600">HTTP 500 🔴</span></div>
+            <div class="infra-action urgent">Check runtime logs</div>
+          </div>
+          <div class="infra-row">
+            <div><div class="infra-name">Elite Writer</div><div class="infra-url">elite-writer-app.insightprofit.live</div></div>
+            <div><span style="color:var(--text-dim);font-size:11px">Never deployed</span></div>
+            <div><span class="infra-host-badge">Coolify</span></div>
+            <div><span class="status-dot status-err"></span><span style="color:var(--red);font-size:11px;font-weight:600">503 Down 🔴</span></div>
+            <div class="infra-action urgent">Deploy Vercel #86e0wzwye</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- CONTENT ENGINE -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span>🧠</span> Content Engine Status</div>
+        <div><span class="pill yellow"><span class="pill-dot"></span>Extraction Pending</span></div>
+      </div>
+      <div class="card-body">
+        <div class="content-stats">
+          <div class="content-stat-card">
+            <div class="content-stat-val" style="color:var(--orange)">~390</div>
+            <div class="content-stat-key">Genspark Chats Unextracted</div>
+          </div>
+          <div class="content-stat-card">
+            <div class="content-stat-val" style="color:var(--text-muted)">—</div>
+            <div class="content-stat-key">KB Items (Supabase offline)</div>
+          </div>
+          <div class="content-stat-card">
+            <div class="content-stat-val" style="color:var(--text-muted)">—</div>
+            <div class="content-stat-key">LifeLegacy Articles</div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:14px;padding:9px 12px;background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);border-radius:6px">
+          ⚠️ <strong>Supabase offline</strong> — self-hosted instance has outstanding invoice (FF-31). Pay to restore live counts for knowledge_items and lifelegacy_articles tables.
+        </div>
+        <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px">KB Extraction Pipeline — 4 Phases</div>
+        <div class="pipeline-phases">
+          <div class="phase-row">
+            <div class="phase-num">1</div>
+            <div class="phase-name">Set up Wiki.js on Oracle VPS (129.213.162.114)</div>
+            <div><span class="pill yellow"><span class="pill-dot"></span>Open</span></div>
+            <a href="https://app.clickup.com/t/86e0d8c01" class="phase-link" target="_blank">#86e0d8c01</a>
+          </div>
+          <div class="phase-row">
+            <div class="phase-num">2</div>
+            <div class="phase-name">Extract Genspark chats — test batch (5-10 chats)</div>
+            <div><span class="pill yellow"><span class="pill-dot"></span>Open</span></div>
+            <a href="https://app.clickup.com/t/86e0d8c0x" class="phase-link" target="_blank">#86e0d8c0x</a>
+          </div>
+          <div class="phase-row">
+            <div class="phase-num">3</div>
+            <div class="phase-name">Scale Genspark extraction (~390 remaining chats)</div>
+            <div><span class="pill yellow"><span class="pill-dot"></span>Open</span></div>
+            <a href="https://app.clickup.com/t/86e0d8c34" class="phase-link" target="_blank">#86e0d8c34</a>
+          </div>
+          <div class="phase-row">
+            <div class="phase-num">4</div>
+            <div class="phase-name">Extract Manus.ai content → KB</div>
+            <div><span class="pill yellow"><span class="pill-dot"></span>Open</span></div>
+            <a href="https://app.clickup.com/t/86e0d8c48" class="phase-link" target="_blank">#86e0d8c48</a>
+          </div>
+        </div>
+        <div style="margin-top:16px">
+          <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px">Dispatch Routes — insightprofit.live (Apr 14 Audit)</div>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <div style="display:flex;align-items:center;gap:8px;font-size:11px;padding:7px 10px;background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:6px">
+              <span class="status-dot status-live"></span>
+              <span style="font-family:var(--mono);color:var(--text-dim);width:150px;flex-shrink:0">ai_research</span>
+              <span style="color:var(--text)">PopeBot / Railway / Groq ✅</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:11px;padding:7px 10px;background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:6px">
+              <span class="status-dot status-live"></span>
+              <span style="font-family:var(--mono);color:var(--text-dim);width:150px;flex-shrink:0">ai_platform</span>
+              <span style="color:var(--text)">Polsia / Railway ✅</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:11px;padding:7px 10px;background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:6px">
+              <span class="status-dot status-live"></span>
+              <span style="font-family:var(--mono);color:var(--text-dim);width:150px;flex-shrink:0">knowledge_base</span>
+              <span style="color:var(--text)">Nextra + Neon → kb.insightprofit.live ✅</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:11px;padding:7px 10px;background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:6px">
+              <span class="status-dot status-live"></span>
+              <span style="font-family:var(--mono);color:var(--text-dim);width:150px;flex-shrink:0">command_center</span>
+              <span style="color:var(--text)">center.insightprofit.live ✅ Fixed Apr 14</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:11px;padding:7px 10px;background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.25);border-radius:6px">
+              <span class="status-dot status-err"></span>
+              <span style="font-family:var(--mono);color:var(--text-dim);width:150px;flex-shrink:0">video_content</span>
+              <span style="color:var(--red)">VidRevamp HTTP 500 — route BROKEN 🔴</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:11px;padding:7px 10px;background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.25);border-radius:6px">
+              <span class="status-dot status-err"></span>
+              <span style="font-family:var(--mono);color:var(--text-dim);width:150px;flex-shrink:0">publication_writing</span>
+              <span style="color:var(--red)">Elite Writer never deployed — route BROKEN 🔴</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI SPEND + QUICK LINKS -->
+  <div class="section-label">💸 AI Spend Tracker &amp; Quick Access</div>
+  <div class="row row-2">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span>📊</span> AI API &amp; Infrastructure Costs · April 2026</div>
+        <div><span class="pill yellow"><span class="pill-dot"></span>Connect APIs for live data</span></div>
+      </div>
+      <div class="card-body">
+        <div class="spend-rows">
+          <div>
+            <div class="spend-header">
+              <div class="spend-provider">🤖 OpenRouter</div>
+              <div class="spend-amounts">$-- MTD &nbsp;/&nbsp; $150 budget</div>
+            </div>
+            <div class="spend-bar"><div class="spend-fill" style="width:45%;background:linear-gradient(90deg,var(--accent),var(--purple))"></div></div>
+            <div style="font-size:10px;color:var(--text-dim);margin-top:3px">PopeBot + Polsia + ClaudeClaw dispatch routing. Primary LLM router.</div>
+          </div>
+          <div>
+            <div class="spend-header">
+              <div class="spend-provider">🎨 Fal.ai</div>
+              <div class="spend-amounts">$-- MTD &nbsp;/&nbsp; $50 budget</div>
+            </div>
+            <div class="spend-bar"><div class="spend-fill" style="width:20%;background:linear-gradient(90deg,var(--orange),var(--yellow))"></div></div>
+            <div style="font-size:10px;color:var(--text-dim);margin-top:3px">Image gen for FGS product mockups + social content creation.</div>
+          </div>
+          <div>
+            <div class="spend-header">
+              <div class="spend-provider">🚂 Railway</div>
+              <div class="spend-amounts">$-- MTD &nbsp;/&nbsp; $30 budget</div>
+            </div>
+            <div class="spend-bar"><div class="spend-fill" style="width:65%;background:linear-gradient(90deg,var(--green),#16a34a)"></div></div>
+            <div style="font-size:10px;color:var(--text-dim);margin-top:3px">2 services running: PopeBot + Polsia. Connect Railway API for live billing.</div>
+          </div>
+          <div>
+            <div class="spend-header">
+              <div class="spend-provider">▲ Vercel</div>
+              <div class="spend-amounts">$-- MTD &nbsp;/&nbsp; $20 budget</div>
+            </div>
+            <div class="spend-bar"><div class="spend-fill" style="width:30%;background:linear-gradient(90deg,var(--blue),#1d4ed8)"></div></div>
+            <div style="font-size:10px;color:var(--text-dim);margin-top:3px">KB + Command Center + CMO Center + FGS Engine (errored). Connect Vercel API.</div>
+          </div>
+          <div>
+            <div class="spend-header">
+              <div class="spend-provider">☁️ Oracle Cloud</div>
+              <div class="spend-amounts">$0 MTD &nbsp;/&nbsp; Free tier</div>
+            </div>
+            <div class="spend-bar"><div class="spend-fill" style="width:5%;background:var(--green)"></div></div>
+            <div style="font-size:10px;color:var(--text-dim);margin-top:3px">Always-Free VM (129.213.162.114) — Coolify, Supabase self-hosted, n8n, Docmost.</div>
+          </div>
+        </div>
+        <div class="total-spend">
+          <div>
+            <div class="total-label">Est. Monthly AI Budget</div>
+            <div style="font-size:10px;color:var(--text-dim)">Connect APIs in Notion Keys Vault for live totals</div>
+          </div>
+          <div style="text-align:right">
+            <div class="total-val">~$250/mo</div>
+            <div style="font-size:10px;color:var(--text-dim)">Estimated budget cap</div>
+          </div>
+        </div>
+        <div style="margin-top:12px;padding:10px 12px;background:var(--accent-dim);border:1px solid rgba(99,102,241,0.2);border-radius:6px;font-size:11px;color:var(--accent-light)">
+          💡 <strong>To enable live spend:</strong> Add OpenRouter, Railway, and Vercel API tokens to Notion Keys Vault (<a href="https://notion.so/153f57485e07806aa80ee79341a94ea1" target="_blank" style="color:var(--accent-light)">Keys page</a>), then ask Claude to refresh spend data.
+        </div>
+      </div>
+    </div>
+
+    <!-- QUICK LINKS -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span>🔗</span> Quick Links &amp; Today's Checklist</div>
+      </div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">
+          <a href="https://app.clickup.com/14233858/home" target="_blank" style="text-decoration:none">
+            <div style="background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+              <div style="font-size:20px">📋</div><div style="font-size:10px;font-weight:600;color:var(--text);margin-top:4px">ClickUp</div>
+            </div>
+          </a>
+          <a href="https://center.insightprofit.live" target="_blank" style="text-decoration:none">
+            <div style="background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+              <div style="font-size:20px">🎯</div><div style="font-size:10px;font-weight:600;color:var(--text);margin-top:4px">Command Ctr</div>
+            </div>
+          </a>
+          <a href="https://kb.insightprofit.live" target="_blank" style="text-decoration:none">
+            <div style="background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+              <div style="font-size:20px">🧠</div><div style="font-size:10px;font-weight:600;color:var(--text);margin-top:4px">Knowledge Base</div>
+            </div>
+          </a>
+          <a href="https://command-center-rouge-pi.vercel.app" target="_blank" style="text-decoration:none">
+            <div style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.3);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-size:20px">💡</div><div style="font-size:10px;font-weight:600;color:var(--green);margin-top:4px">CMO App $97</div>
+            </div>
+          </a>
+          <a href="https://www.notion.so" target="_blank" style="text-decoration:none">
+            <div style="background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+              <div style="font-size:20px">📓</div><div style="font-size:10px;font-weight:600;color:var(--text);margin-top:4px">Notion</div>
+            </div>
+          </a>
+          <a href="https://thepopebot-production-e881.up.railway.app" target="_blank" style="text-decoration:none">
+            <div style="background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--border)'">
+              <div style="font-size:20px">🤖</div><div style="font-size:10px;font-weight:600;color:var(--text);margin-top:4px">PopeBot</div>
+            </div>
+          </a>
+          <a href="https://github.com/rtmendes" target="_blank" style="text-decoration:none">
+            <div style="background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+              <div style="font-size:20px">⚡</div><div style="font-size:10px;font-weight:600;color:var(--text);margin-top:4px">GitHub</div>
+            </div>
+          </a>
+          <a href="https://familygiftstudio.com" target="_blank" style="text-decoration:none">
+            <div style="background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-size:20px">🎁</div><div style="font-size:10px;font-weight:600;color:var(--red);margin-top:4px">FGS ⚠️Paused</div>
+            </div>
+          </a>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:14px">
+          <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px">⚡ Today's Power Checklist</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-size:12px;color:var(--text)">
+              <input type="checkbox" style="margin-top:2px;accent-color:var(--accent);flex-shrink:0">
+              <span>💳 Pay Shopify invoice → reactivate Family Gift Studio store</span>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-size:12px;color:var(--text)">
+              <input type="checkbox" style="margin-top:2px;accent-color:var(--accent);flex-shrink:0">
+              <span>💳 Pay Supabase invoice → restore database access (FF-31)</span>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-size:12px;color:var(--text)">
+              <input type="checkbox" style="margin-top:2px;accent-color:var(--accent);flex-shrink:0">
+              <span>💰 Create GHL product + order form for CMO Command Center at $97</span>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-size:12px;color:var(--text)">
+              <input type="checkbox" style="margin-top:2px;accent-color:var(--accent);flex-shrink:0">
+              <span>📧 Publish first LinkedIn post from the 30-post fractional CMO calendar</span>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-size:12px;color:var(--text)">
+              <input type="checkbox" style="margin-top:2px;accent-color:var(--accent);flex-shrink:0">
+              <span>🧠 Start Phase 1: Set up Wiki.js on Oracle VPS for KB extraction</span>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-size:12px;color:var(--text)">
+              <input type="checkbox" style="margin-top:2px;accent-color:var(--accent);flex-shrink:0">
+              <span>✈️ Contact Liberty University Aviation re: June 2026 PPL program enrollment</span>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-size:12px;color:var(--text)">
+              <input type="checkbox" style="margin-top:2px;accent-color:var(--accent);flex-shrink:0">
+              <span>🌺 Upload 5 Wife/Love Knot jewelry SKUs to ShineOn (after Shopify activation)</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<footer class="footer">
+  <div class="footer-left">Chief of Staff Dashboard · Rashida Mendes · Data sourced live from ClickUp (Workspace 14233858) + Notion · Dispatch Routing Map Apr 14, 2026 · <span id="footerTime"></span></div>
+  <div class="footer-links">
+    <a href="https://app.clickup.com/14233858/home" class="footer-link" target="_blank">📋 ClickUp</a>
+    <a href="https://notion.so" class="footer-link" target="_blank">📓 Notion</a>
+    <a href="https://center.insightprofit.live" class="footer-link" target="_blank">🎯 Command Center</a>
+    <a href="https://kb.insightprofit.live" class="footer-link" target="_blank">🧠 Knowledge Base</a>
+  </div>
+</footer>
+
+<script>
+  function updateTime() {
+    const now = new Date();
+    const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
+    document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', opts);
+    const t = now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+    const b = document.getElementById('briefTime');
+    if(b) b.textContent = 'Generated ' + t;
+    const f = document.getElementById('footerTime');
+    if(f) f.textContent = 'Last refresh: ' + t;
+  }
+  updateTime();
+  setInterval(updateTime, 60000);
+
+  window.addEventListener('load', () => {
+    document.querySelectorAll('.progress-fill').forEach(f => {
+      const w = f.style.width;
+      f.style.width = '0%';
+      setTimeout(() => { f.style.width = w; }, 150);
+    });
+  });
+
+  document.querySelectorAll('input[type=checkbox]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const label = cb.closest('label');
+      if (label) {
+        label.style.opacity = cb.checked ? '0.45' : '1';
+        label.style.textDecoration = cb.checked ? 'line-through' : 'none';
+      }
+    });
+  });
+</script>
+</body>
+</html>
